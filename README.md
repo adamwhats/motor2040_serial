@@ -5,7 +5,7 @@ This project builds a script for driving the [Pimoroni Motor2040 Motor Controlle
 Target velocities are sent via an 8 byte string, which is parsed as four 16 bit signed integers which control the speed of each motor - take care with the order!
 
 ## TODO
-- [ ] Check that a fresh clone of the repo works properly
+- [x] Check that a fresh clone of the repo works properly
 - [ ] Stream the current velocity back to the master PC
 - [ ] Stream the current position back to the master PC
 - [ ] Expose relevant information to allow for actual velocity in task space to be set. Maybe do this through an abstract C++ class on the master PC side which ROS can interact with
