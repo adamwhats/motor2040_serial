@@ -15,7 +15,7 @@ if __name__ == '__main__':
     try:
 
         # Connect
-        ser = serial.Serial('/dev/ttyACM1')
+        ser = serial.Serial('/dev/ttyACM0')
         print(f"Connected to {ser.name}, {ser.is_open}")
 
         # Move forwards
