@@ -2,13 +2,16 @@
 
 This project builds a script for driving the [Pimoroni Motor2040 Motor Controller](https://shop.pimoroni.com/products/motor-2040) board via USB, offering velocity control for each of the four motors.
 
-Target velocities are sent via an 8 byte string, which is parsed as four 16 bit signed integers which control the speed of each motor - take care with the order!
+Target velocities are sent via an 16 byte string, which is parsed as four 32 bit floats which control the speed of each motor in rotations per second. Remember to take care with the order!
+
+Please get in contact with any suggestions for improvements.
 
 ## TODO
 - [x] Check that a fresh clone of the repo works properly
 - [ ] Stream the current velocity back to the master PC
 - [ ] Stream the current position back to the master PC
-- [ ] Expose relevant information to allow for actual velocity in task space to be set. Maybe do this through an abstract C++ class on the master PC side which ROS can interact with
+- [x] Expose relevant information to allow for actual velocity in task space to be set
+- [ ] Add error checking (xor on the incoming bytes?)
 
 ## Build
 

@@ -47,9 +47,6 @@ const uint UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES;
 // How many of the updates should be printed (i.e. 2 would be every other update)
 const uint PRINT_DIVIDER = 4;
 
-// The speed to drive the wheels at
-float DRIVING_SPEED = 1.0f;
-
 // PID values
 constexpr float VEL_KP = 30.0f;   // Velocity proportional (P) gain
 constexpr float VEL_KI = 0.0f;    // Velocity integral (I) gain
@@ -126,24 +123,15 @@ void cdc_task(){
       uint8_t buf[64];
       uint32_t count = tud_cdc_n_read(0, buf, sizeof(buf));
 
-      // Convert the 8 bytes into 4 int16_t
-      int16_t vels_encoded[NUM_MOTORS];
-      for (int i = 0; i < sizeof(NUM_MOTORS); i++) {
-          vels_encoded[i] = static_cast<int16_t>((buf[2*i+1] << 8) | buf[2*i]);
-      }
-
-      // Normalise the int16_t to floats between -1 and 1
-      const float MAX_SIGNED_INT = 32767.0f;
-      float vels_norm[NUM_MOTORS];
-      for (int i = 0; i < sizeof(NUM_MOTORS); i++) {
-          vels_norm[i] = static_cast<float>(vels_encoded[i]) / MAX_SIGNED_INT;
-      }
+      // Convert the 16 bytes into 4 float32  
+      float vels[NUM_MOTORS];
+      memcpy(vels, buf, sizeof(vels));
       
       // Update the motor target speeds
-      vel_pids[FL].setpoint = vels_norm[FL];
-      vel_pids[FR].setpoint = vels_norm[FR];
-      vel_pids[RL].setpoint = vels_norm[RL];
-      vel_pids[RR].setpoint = vels_norm[RR];
+      vel_pids[FL].setpoint = vels[FL];
+      vel_pids[FR].setpoint = vels[FR];
+      vel_pids[RL].setpoint = vels[RL];
+      vel_pids[RR].setpoint = vels[RR];
 
     }
   }
