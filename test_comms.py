@@ -21,30 +21,47 @@ if __name__ == '__main__':
 
         # Move forwards
         ser.write(encode_vels(1, 1, 1, 1))
-        time.sleep(4)
-
-        # Move forwards
-        ser.write(encode_vels(-1, -1, -1, -1))
-        time.sleep(4)
-
-        # Move forwards
-        ser.write(encode_vels(2, 2, 2, 2))
-        time.sleep(4)
+        time.sleep(3)
 
         # Move forwards
         ser.write(encode_vels(-2, -2, -2, -2))
-        time.sleep(4)
+        time.sleep(3)
+
+        # Move forwards
+        ser.write(encode_vels(3, 3, 3, 3))
+        time.sleep(3)
+
+        # Move forwards
+        ser.write(encode_vels(-4, -4, -4, -4))
+        time.sleep(3)
 
         # Individual control
         step = 0
-        while step < (4 * math.pi):
-            vels = [math.sin(step + (n * math.pi / 2)) for n in range(4)]
+        while step < (8 * math.pi):
+            # Send vels
+            vels = [3 * math.sin(step + (n * math.pi / 2)) for n in range(4)]
+            ser.reset_input_buffer()
+
+            # Wait for response
             ser.write(encode_vels(*vels))
-            step += 0.002
-            time.sleep(0.001)
+            response_bytes = ser.read(16)
+            response_floats = struct.unpack('4f', response_bytes)
+
+            # Print response
+            if round(step, 2) % 1 == 0:
+                print(f"------{round(step, 2)}------")
+                for n in range(4):
+                    print(f"{n}: {vels[n]: .2f}, {response_floats[n]: .2f}")
+            step += 0.02
+            time.sleep(0.01)
+
+        ser.write(encode_vels(0, 0, 0, 0))
 
     except Exception as ex:
         print(ex)
+
+    except KeyboardInterrupt:
+        pass
 
     ser.write(encode_vels(0, 0, 0, 0))
     ser.close()

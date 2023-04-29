@@ -8,7 +8,7 @@ Please get in contact with any suggestions for improvements.
 
 ## TODO
 - [x] Check that a fresh clone of the repo works properly
-- [ ] Stream the current velocity back to the master PC
+- [x] Stream the current velocity back to the master PC
 - [ ] Stream the current position back to the master PC
 - [x] Expose relevant information to allow for actual velocity in task space to be set
 - [ ] Add error checking (xor on the incoming bytes?)

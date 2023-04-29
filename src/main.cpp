@@ -1,12 +1,12 @@
-#include <cstdio>
 #include <chrono>
+#include <cstdio>
+#include <string>
 #include <thread>
 #include "pico/stdlib.h"
 
 #include "motor2040.hpp"
 #include "button.hpp"
 #include "pid.hpp"
-
 #include "bsp/board.h"
 #include "tusb.h"
 
@@ -65,6 +65,9 @@ const char* ENCODER_NAMES[] = {"RR", "RL", "FL", "FR"};
 const uint NUM_ENCODERS = count_of(encoder_pins);
 Encoder *encoders[NUM_ENCODERS];
 
+// Create an array of encoder capture structs
+Encoder::Capture captures[NUM_MOTORS];
+
 // Create the user button
 Button user_sw(motor2040::USER_SW);
 
@@ -98,8 +101,6 @@ void motors_init()
 
 void motors_update()
 {
-  Encoder::Capture captures[NUM_MOTORS];
-
   // Capture the state of all the encoders
   for(auto i = 0u; i < NUM_MOTORS; i++) {
     captures[i] = encoders[i]->capture();
@@ -115,24 +116,38 @@ void motors_update()
 }
 
 void cdc_task(){
-  if(tud_cdc_n_connected(0))
+  if(tud_cdc_connected())
   {
-    if(tud_cdc_n_available(0))
+    if(tud_cdc_available())
     {
       // Create a buffer and read bytes into it
       uint8_t buf[64];
-      uint32_t count = tud_cdc_n_read(0, buf, sizeof(buf));
+      uint32_t count = tud_cdc_read(buf, sizeof(buf));
 
       // Convert the 16 bytes into 4 float32  
-      float vels[NUM_MOTORS];
-      memcpy(vels, buf, sizeof(vels));
+      float vels_target[NUM_MOTORS];
+      memcpy(vels_target, buf, sizeof(vels_target));
       
       // Update the motor target speeds
-      vel_pids[FL].setpoint = vels[FL];
-      vel_pids[FR].setpoint = vels[FR];
-      vel_pids[RL].setpoint = vels[RL];
-      vel_pids[RR].setpoint = vels[RR];
+      vel_pids[FL].setpoint = vels_target[FL];
+      vel_pids[FR].setpoint = vels_target[FR];
+      vel_pids[RL].setpoint = vels_target[RL];
+      vel_pids[RR].setpoint = vels_target[RR];
 
+      // Read the actual motor encoder speeds
+      float vels_actual[NUM_MOTORS];
+      for(auto i = 0u; i < NUM_MOTORS; i++) { 
+        vels_actual[i] = captures[i].revolutions_per_second();
+      }
+      
+      // Send the actual speed back
+      uint8_t bytes[16];
+      for (int i = 0; i < sizeof(vels_actual); i++) {
+        const char* cptr = reinterpret_cast<const char*>(&vels_actual[i]);
+        memcpy(&bytes[i * sizeof(float)], cptr, sizeof(float));
+      }
+      tud_cdc_n_write(0, bytes, sizeof(bytes));
+      tud_cdc_n_write_flush(0);
     }
   }
 }
@@ -152,14 +167,14 @@ int main() {
     // tinyusb device task
     tud_task();
 
-    // Read incoming serial
-    cdc_task();
-
     // Update the motors
     motors_update();
+
+    // Read incoming serial
+    cdc_task();
     
-  
-    sleep_ms(2);
+    // Sleep
+    sleep_ms(5);
 
   }
 
