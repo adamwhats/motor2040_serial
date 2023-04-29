@@ -48,7 +48,7 @@ const uint UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES;
 const uint PRINT_DIVIDER = 4;
 
 // The speed to drive the wheels at
-float DRIVING_SPEED = 2.0f;
+float DRIVING_SPEED = 1.0f;
 
 // PID values
 constexpr float VEL_KP = 30.0f;   // Velocity proportional (P) gain
@@ -73,36 +73,6 @@ Button user_sw(motor2040::USER_SW);
 
 // Create an array of PID pointers
 PID vel_pids[NUM_MOTORS];
-
-
-// Helper functions for driving in common directions
-void drive_forward(float speed) {
-  vel_pids[FL].setpoint = speed;
-  vel_pids[FR].setpoint = speed;
-  vel_pids[RL].setpoint = speed;
-  vel_pids[RR].setpoint = speed;
-}
-
-void turn_right(float speed) {
-  vel_pids[FL].setpoint = speed;
-  vel_pids[FR].setpoint = -speed;
-  vel_pids[RL].setpoint = speed;
-  vel_pids[RR].setpoint = -speed;
-}
-
-void strafe_right(float speed) {
-  vel_pids[FL].setpoint = speed;
-  vel_pids[FR].setpoint = -speed;
-  vel_pids[RL].setpoint = -speed;
-  vel_pids[RR].setpoint = speed;
-}
-
-void stop() {
-  vel_pids[FL].setpoint = 0.0f;
-  vel_pids[FR].setpoint = 0.0f;
-  vel_pids[RL].setpoint = 0.0f;
-  vel_pids[RR].setpoint = 0.0f;
-}
 
 void motors_init()
 {
